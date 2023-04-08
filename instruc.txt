@@ -1,0 +1,3 @@
+To start mosquitto in cmd
+
+mosquitto -v -c local_hotspot.conf
