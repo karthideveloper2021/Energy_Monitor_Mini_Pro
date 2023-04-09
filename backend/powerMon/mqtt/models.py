@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from websocket.consumers import sendDatatoClient
 
 # Create your models here.
 class Device(models.Model):
@@ -19,7 +21,7 @@ class DeviceTimerLog(models.Model):
     endTime=models.DateTimeField(null=True,blank=True)
 
     def __str__(self):
-        return str(self.deviceId)+" -- [ "+str(self.startTime)+" : "+str(self.endTime)+" ]"
+        return str(self.deviceId)+" -- [ "+str(self.startTime.astimezone())+" : "+str(self.endTime.astimezone() if self.endTime!=None else None)+" ]"
 
 class DevicePowerLog(models.Model):
     logId=models.ForeignKey(DeviceTimerLog,on_delete=models.CASCADE)
@@ -27,4 +29,8 @@ class DevicePowerLog(models.Model):
     createdAt=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        
         return str(self.logId)
+
+    
+post_save.connect(sendDatatoClient,sender=Device)

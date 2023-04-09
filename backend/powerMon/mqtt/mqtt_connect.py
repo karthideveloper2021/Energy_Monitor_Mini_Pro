@@ -21,12 +21,12 @@ def on_message(mqtt_client,userdata,message):
     try:
         data=json.loads(message.payload)
         event=data["event"]
-        device=Device(id=message.topic)
+        device=Device.objects.get_or_create(id=message.topic)[0]
         
         if event=="status":
 
             device.status=data["value"]
-            device.save(update_fields=["status"])
+            device.save(update_fields=["status","updatedAt"])
 
             
             timerLogLatest=DeviceTimerLog.objects.filter(deviceId=device)
@@ -42,10 +42,9 @@ def on_message(mqtt_client,userdata,message):
                 timerLogLatest.endTime=timezone.now()
                 timerLogLatest.save(update_fields=["endTime"])
 
-
         elif event=="data":
 
-            timerLog=DeviceTimerLog.objects.filter(deviceId=device).latest("deviceId")
+            timerLog=DeviceTimerLog.objects.filter(deviceId=device).latest("deviceId","startTime")
             
             device.power=data["power"]
             device.current=data["current"]
@@ -56,12 +55,11 @@ def on_message(mqtt_client,userdata,message):
             log.power=device.power
             log.save()
         
-            device.save(update_fields=["power","current","voltage"])
+            device.save(update_fields=["power","current","voltage","updatedAt"])
             
 
     except Exception as e:
         print(message.payload,e)
-
 
 
 client=Client()
