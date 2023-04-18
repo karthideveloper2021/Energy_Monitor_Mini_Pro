@@ -1,3 +1,9 @@
 To start mosquitto in cmd
 
 mosquitto -v -c local_hotspot.conf
+
+go to command prompt administrator
+
+run the command netstat -ano | findstr 1883
+
+then kill the process taskkill /F /PID 4464
