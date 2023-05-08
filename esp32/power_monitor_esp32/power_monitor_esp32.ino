@@ -19,6 +19,7 @@ void publishData(deviceInfo);
 Voltage voltSensor;
 Current currentSensor1;
 Current currentSensor2;
+Current currentSensor3;
 
 int voltPin=36;
 float voltage=0; //buffer

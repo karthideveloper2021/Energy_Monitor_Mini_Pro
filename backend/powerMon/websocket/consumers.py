@@ -20,23 +20,25 @@ class powerMonitorConsumer(WebsocketConsumer):
 
         from mqtt.models import Device
         for instance in Device.objects.all():
-            data=json.dumps({
-                "deviceId":instance.id,
-                "power":instance.power,
-                "current":instance.current,
-                "voltage":instance.voltage,
-                "modified":instance.updatedAt.ctime(),
-                "status":instance.status
-            })
-            async_to_sync(self.channel_layer.group_send)(
-                "deviceGroup",
-                {
-                    "type":"send.message",
-                    "message":data,
-                })
+            data=toJson(instance)
+            self.send_message({"message":data})
 
     def receive(self, text_data=None, bytes_data=None):
-        print(text_data)
+        requestData=json.loads(text_data)
+        if(requestData["request"]=="result"):
+            from mqtt.models import Device
+            from django.db.models import Sum
+
+            totalUnit=Device.objects.aggregate(Sum("unit"))
+            rawData={
+                "content":"result",
+                "totalUnit":totalUnit["unit__sum"]
+            }
+            data=json.dumps(rawData)
+
+            print(self.channel_name)
+
+            self.send_message({"message":data})
     
     def send_message(self,event):
         self.send(event["message"])
@@ -52,16 +54,9 @@ class powerMonitorConsumer(WebsocketConsumer):
 def sendDatatoClient(sender,instance,**kwargs):
     print("received",sender,instance)
     channel_layer=channels.layers.get_channel_layer()
-    data=json.dumps({
-                "deviceId":instance.id,
-                "power":instance.power,
-                "current":instance.current,
-                "voltage":instance.voltage,
-                "modified":instance.updatedAt.ctime(),
-                "status":instance.status
-
-            })
+    data=toJson(instance)
     print(data)
+            
     async_to_sync(channel_layer.group_send)(
         "deviceGroup",
         {
@@ -69,4 +64,15 @@ def sendDatatoClient(sender,instance,**kwargs):
             "message":data,
             
         })
+    
+def toJson(instance):
+    return json.dumps({
+                "content":"deviceInfo",
+                "deviceId":instance.id,
+                "power":instance.power,
+                "current":instance.current,
+                "voltage":instance.voltage,
+                "modified":instance.updatedAt.ctime(),
+                "status":instance.status,
+                "unit":instance.unit})
     

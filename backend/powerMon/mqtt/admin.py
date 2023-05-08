@@ -6,10 +6,13 @@ from  mqtt.models import Device,DevicePowerLog,DeviceTimerLog
 class DeviceAdminView(admin.ModelAdmin):
     list_display=[
         "id",
+        "deviceName",
         "status",
         "power",
         "voltage",
         "current",
+        "unit",
+        "powerRate",
         "updatedAt",
         "registeredAt"
     ]
@@ -27,7 +30,8 @@ class DeviceTimerLogAdminView(admin.ModelAdmin):
     list_display=[
         "deviceId",
         "startTime",
-        "endTime"
+        "endTime",
+        "averagePower"
     ]
 
 admin.site.register(Device,DeviceAdminView)

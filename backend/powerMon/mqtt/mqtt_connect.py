@@ -2,6 +2,7 @@ from paho.mqtt.client import Client
 from django.conf import settings
 import json
 from django.utils import timezone
+from django.db.models import Avg
 
 
 def on_connect(mqtt_client, userdata, flags, rc):
@@ -40,12 +41,21 @@ def on_message(mqtt_client,userdata,message):
             print(timerLogLatest)
             if(device.status==False and timerLogLatest.endTime==None and timerLogLatest.startTime!=None):
                 timerLogLatest.endTime=timezone.now()
-                timerLogLatest.save(update_fields=["endTime"])
+
+                averagePower=DevicePowerLog.objects.filter(logId=timerLogLatest).aggregate(Avg("power"))
+                
+                timerLogLatest.averagePower=averagePower["power__avg"]
+                timerLogLatest.save(update_fields=["endTime","averagePower"])
+                
+                device.unit+=device.powerRate
+                print("last power rate ",device.powerRate)
+                device.save(update_fields=["unit"])
 
         elif event=="data":
 
             timerLog=DeviceTimerLog.objects.filter(deviceId=device).latest("deviceId","startTime")
             
+
             device.power=data["power"]
             device.current=data["current"]
             device.voltage=data["voltage"]
@@ -54,8 +64,12 @@ def on_message(mqtt_client,userdata,message):
             log.logId=timerLog
             log.power=device.power
             log.save()
+
+            timeDiff=timezone.now()-timerLog.startTime
+            device.powerRate=(device.power/1000)*(timeDiff.seconds/3600)*0.90 
+            #0.90-->pf
         
-            device.save(update_fields=["power","current","voltage","updatedAt"])
+            device.save(update_fields=["power","current","voltage","powerRate","updatedAt"])
             
 
     except Exception as e:

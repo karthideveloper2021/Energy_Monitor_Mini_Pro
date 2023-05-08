@@ -1,5 +1,5 @@
 void process(struct deviceInfo* device){
-  if(device->current>0.015 || device->voltage>200)
+  if(device->current>0.015 && device->voltage>200)
   {
     if (device->statusFlag){
       publishStatus(device->id,1); 

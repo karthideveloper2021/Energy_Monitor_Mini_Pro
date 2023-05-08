@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'websocket',
     'mqtt',
+    'telegramBot',
+    'monitor'
     
 ]
 
@@ -140,3 +142,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MQTT_SERVER = "192.168.137.1"
 MQTT_PORT = 1883
 MQTT_KEEPALIVE = 60
+
+
+TELEGRAM_API="5853432720:AAEmDrhOYTl2O51nRJWHZVfzF8i6Q6aA7ew"

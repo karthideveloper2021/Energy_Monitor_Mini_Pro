@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse,JsonResponse
 from mqtt.models import Device
+from telegramBot import telegram
 
 # Create your views here.
 def home(request):
@@ -12,3 +13,7 @@ def listAll(request):
         'devices':devices
     }
     return JsonResponse(json)
+
+def sendAlert(request):
+    telegram.sendMessage("Alert user!!")
+    return HttpResponse("OK")

@@ -23,7 +23,7 @@ class Current{
       float currentMean=0;
       for(int j=0;j<averageSampleCount;j++){
         for(int i=0;i<sample;i++){
-          sampleReadSum+=sq(analogRead(_pin)-1820);
+          sampleReadSum+=sq(analogRead(_pin)-2482); //1820     //2482=>2*4096/3.3
           delay(0.1);
         }
         currentMean+=sqrt(sampleReadSum/sample);
@@ -31,11 +31,13 @@ class Current{
       }
 
       _currentsum=currentMean/averageSampleCount;
-      _currentsum=_currentsum-_offset;
+      _currentsum=(_currentsum+2482)*3.3/4096;
+      // _currentsum=_currentsum-;
+      // _currentsum=_currentsum-_offset;
 
-      if(_currentsum<=0.2) _currentsum=0;
+      // if(_currentsum<=0.2) _currentsum=0;
 
-      return (_currentsum * _calibrateValue);
+      return (_currentsum * 5/2.65);
       
     }
 };
