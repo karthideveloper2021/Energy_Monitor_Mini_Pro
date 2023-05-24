@@ -64,6 +64,37 @@ def sendDatatoClient(sender,instance,**kwargs):
             "message":data,
             
         })
+
+    from mqtt.models import Device
+    from django.db.models import Sum
+
+    totalUnit=Device.objects.aggregate(Sum("unit"))
+    total_unit=totalUnit["unit__sum"]
+    remaining_unit=100-total_unit #slab-1
+
+    data={}
+    for instance in Device.objects.all():
+        data[instance.id]={}
+        data[instance.id]["prev_percent_rate"]=instance.unit/total_unit
+    
+        #for slab-1 100
+        data[instance.id]["allot_usage_limit"]=data[instance.id]["prev_percent_rate"]*remaining_unit
+
+    for instance in data:
+        sendData=json.dumps({
+            "content":"deviceLimit",
+            "deviceId":instance,
+            "value":data[instance]["allot_usage_limit"]
+        })
+        async_to_sync(channel_layer.group_send)(
+            "deviceGroup",
+            {
+                "type":"send.message",
+                "message":sendData
+            }
+
+        )
+
     
 def toJson(instance):
     return json.dumps({

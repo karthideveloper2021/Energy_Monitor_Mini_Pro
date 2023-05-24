@@ -3,7 +3,7 @@ void reconnect()
   while(!mqttClient.connected())
   {
     Serial.println("Attempting MQTT Connection..");
-    mqttClient.connect("Siva");
+    mqttClient.connect("PowerMon device");
   }
   Serial.println("Connected");
 }
@@ -27,4 +27,10 @@ void publishData(struct deviceInfo device){
   data["power"]=device.power;
   serializeJson(data,Jsondata);
   mqttClient.publish(device.id.c_str(),Jsondata.c_str()); 
+}
+
+void publishDatatoDebug(){
+  Jsondata="";
+  Jsondata="voltage: "+ String(voltage)+"\n"+"c1: "+String(device1.current)+"c2: "+String(device2.current)+"c3: "+String(device3.current)+"\n"+"p1: "+String(device1.power)+"p2: "+String(device2.power)+"p3: "+String(device3.power);
+  mqttClient.publish("debug",Jsondata.c_str()); 
 }

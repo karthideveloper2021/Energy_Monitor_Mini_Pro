@@ -21,7 +21,7 @@ Current currentSensor1;
 Current currentSensor2;
 Current currentSensor3;
 
-int voltPin=36;
+int voltPin=32;
 float voltage=0; //buffer
 
 

@@ -15,5 +15,5 @@ def listAll(request):
     return JsonResponse(json)
 
 def sendAlert(request):
-    telegram.sendMessage("Alert user!!")
+    telegram.sendMessage(request.body.decode())  #bytes to string
     return HttpResponse("OK")

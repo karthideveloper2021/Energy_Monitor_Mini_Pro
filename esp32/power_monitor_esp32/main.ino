@@ -1,11 +1,11 @@
 void setup() {
 
   // put your setup code here, to run once:
-  voltSensor.calibrate(voltPin,42,3.2266);     //(pin, ghost_value/initial_value,calibrated_scaleup_value);   242/75
+  voltSensor.calibrate(voltPin,42,3.5571);     //(pin, ghost_value/initial_value,calibrated_scaleup_value);   242/75.....239/92.3831818.....220/61.8464
 
-  currentSensor1.calibrate(39,0,1);  //28,0.01384(0.18/13)
-  currentSensor2.calibrate(34,0,1);
-  currentSensor3.calibrate(35,28,1);
+  currentSensor1.calibrate(39,0.014,1);  //28,0.01384(0.18/13)
+  currentSensor2.calibrate(34,0.014,1);
+  currentSensor3.calibrate(35,0.014,2.022471);
 
   Serial.begin(115200);
   WiFi.begin(ssid,password);
@@ -28,55 +28,49 @@ void setup() {
 }
 
 void loop() {
-  // float temp=voltSensor.getVoltage(3000,30);
-  // Serial.print(temp);
-  // Serial.print(" ");
-  // // Serial.println(analogRead(voltPin));
-
-  // temp=currentSensor1.getCurrent(2000);
-  // Serial.print(temp,5);
-  // Serial.print(" ");
-  // temp=currentSensor2.getCurrent(2000);
-  // Serial.println(temp,5);
-
-
-
-
-
-
 
   if(!mqttClient.connected())
   {
     reconnect();
   }
 
-  device1.current=currentSensor1.getCurrent(2000);
+  // Serial.println(analogRead(35));
+  // delay(200);
+
+  device1.current=currentSensor1.getCurrent(100,20);
+  Serial.println("New reading.....");
+  Serial.print("C1: ");
   Serial.print(device1.current,4);
-  Serial.print(" ");
 
-  device2.current=currentSensor2.getCurrent(2000);
+ 
+  device2.current=currentSensor2.getCurrent(100,20);
+  Serial.print(" C2: ");
   Serial.print(device2.current,4);
-  Serial.print(" ");
 
-  device3.current=currentSensor3.getCurrent(2000);
+
+  device3.current=currentSensor3.getCurrent(100,20);
+  Serial.print(" C3: ");
   Serial.println(device3.current,4);
-
+  
   voltage=voltSensor.getVoltage(3000,30);
   device1.voltage=voltage;
   device2.voltage=voltage;
   device3.voltage=voltage;
 
+  Serial.print("Voltage : ");
   Serial.println(voltage);
 
   device1.power=device1.voltage*device1.current;
+  Serial.print("P1: ");
   Serial.print(device1.power);
-  Serial.print(" ");
+
 
   device2.power=device2.voltage*device2.current;
+    Serial.print(" P2: ");
   Serial.print(device2.power);
-  Serial.print(" ");
 
   device3.power=device3.voltage*device3.current;
+  Serial.print(" P3: ");
   Serial.println(device3.power);
 
 
@@ -97,7 +91,7 @@ void loop() {
 
 
 
-
+  publishDatatoDebug();   //for debuging
   mqttClient.loop();
 
 
